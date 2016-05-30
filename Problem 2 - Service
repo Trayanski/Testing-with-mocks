@@ -1,0 +1,142 @@
+package com.company;
+
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.util.HashMap;
+import java.util.Scanner;
+
+public class Problem2ServiceTask {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        Service service = new Service();
+        String ageString;
+        int position;
+
+        System.out.println("Enter (get) to search through the memory for a age.\nEnter (set) to memorize a age.\nEnter (end) to exit the program.\n");
+        System.out.println("The next integers will be validated and probably memorized.");
+
+        Boolean getElementsMode = false;
+        String line = scanner.nextLine();
+        while(!line.equals("end")) {
+            if (line.equals("get")) {
+                getElementsMode = true;
+                System.out.println("Search through the memory time.\nEnter a position:");
+                line = scanner.nextLine();
+                continue;
+            } else if (line.equals("set")){
+                getElementsMode = false;
+                System.out.println("The next integers will be validated and probably memorized.");
+                line = scanner.nextLine();
+                continue;
+            }
+
+            if (!getElementsMode) {
+                try {
+                    if (isNumeric(line)) {
+                        ageString = line;
+                        service.addToData(ageString);
+                        line = scanner.nextLine();
+                    }else{
+                        throw new NumberFormatException("The input must be a number and this number must be greater than or equal to zero!");
+                    }
+                }catch (NumberFormatException ex){
+                    System.out.println(ex.getMessage());
+                    line = scanner.nextLine();
+                }
+            } else {
+                try {
+                    if (isNumeric(line)) {
+                        position = Integer.parseInt(line);
+                        System.out.println(service.getElementAtPosition(position).toString());
+                        line = scanner.nextLine();
+                    }else{
+                        throw new NumberFormatException("The input must be a number and this number must be greater than or equal to zero!");
+                    }
+                }catch (NumberFormatException ex){
+                    System.out.println(ex.getMessage());
+                    line = scanner.nextLine();
+                }catch (IndexOutOfBoundsException ex){
+                    System.out.println(ex.getMessage());
+                    line = scanner.nextLine();
+                }
+            }
+        }
+    }
+
+    private static boolean isNumeric(String str)
+    {
+        for (char c : str.toCharArray())
+        {
+            if (!Character.isDigit(c)) return false;
+        }
+        return true;
+    }
+}
+
+class Service {
+    private HashMap <Integer, Integer> Data = new HashMap<>();
+    private int placeInData = 0;
+
+    public Service(){
+    }
+
+    private Boolean Validator(String ageString){
+        Boolean validOrInvalid;
+        int age = Integer.parseInt(ageString);
+        if (age >= 10 && age <= 100){
+            validOrInvalid = true;
+        }else{
+            validOrInvalid = false;
+        }
+
+        return validOrInvalid;
+    }
+
+    public void addToData(String ageString){
+        if (Validator(ageString)){
+            int age = Integer.parseInt(ageString);
+            this.Data.put(this.placeInData, age);
+            this.placeInData++;
+        }else{
+            System.out.println("The age is not valid!");
+        }
+    }
+
+    public Boolean getElementAtPosition(int position){
+        if (position>=0 && position < Data.size()) {
+            if (this.Data.get(position) >= 18) {
+                return true;
+            } else {
+                return false;
+            }
+        }else{
+            int size = this.Data.size();
+            if (size == 0){
+                throw new IndexOutOfBoundsException("The data is empty.");
+            }else{
+                throw new IndexOutOfBoundsException("The position must be inside the bounds (0 - " + (size - 1) + ")");
+            }
+        }
+    }
+}
+
+class ServiceTaskTests{
+    public ServiceTaskTests(){
+    }
+    //TODO: make a mocked class - this class wont be affected by the other methods
+    //TODO: rewrite this whole file using the TDD writing style
+    //TODO: after that start reading the god damn book that the boss recommended you
+    //TODO: What are the difference between jmock and the other mocking frameworks
+
+    @Test //(expected = Exception.class)
+    public final void SetAndGetText_CorrectInput_CompleteSetAndGet() {
+        String line = "";
+        Assert.assertEquals("", "", line);
+    }
+
+    @Test //(expected = Exception.class)
+    public final void Method_Input_Outcome(){
+
+    }
+}
