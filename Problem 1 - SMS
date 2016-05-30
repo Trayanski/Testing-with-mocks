@@ -1,0 +1,209 @@
+package com.company;
+
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
+public class SMS {
+    public static void main(String[] args) {
+        SMSProgram smsProgram = new SMSProgram();
+        smsProgram.setReceaver("Receaver");
+        smsProgram.setTitle("This is the title");
+        smsProgram.setText("Some text.");
+        System.out.println(smsProgram.getReceaver());
+        System.out.println(smsProgram.getTitle());
+        System.out.println(smsProgram.getText());
+        System.out.println();
+
+        smsProgram.printSMS();
+
+        System.out.println("\nTests:");
+        TestingMethods tests = new TestingMethods();
+        tests.SetAndGetText_CorrectInput_CompleteSetAndGet();
+        tests.SetAndGetText_BiggerThan120Input_Throw();
+        tests.SetAndGetReceaver_CorrectInput_CompleteSetAndGet();
+        tests.SetAndGetTitle_CorrectInput_CompleteSetAndGet();
+        tests.SetAndGetReceaver_CorrectInput_Complete();
+        tests.SetAndGetTitle_CorrectInput_Complete();
+        tests.SetAndGetText_CorrectInput_Complete();
+        tests.PrintSms_NullReceaverInput_Throw();
+        tests.PrintSms_NullTitleInput_Throw();
+        tests.PrintSms_NullTextInput_Throw();
+    }
+}
+
+class SMSProgram{
+    private String receaver;
+    private String title;
+    private String text;
+
+    public SMSProgram(){
+
+    }
+
+    public SMSProgram(String receaver, String title, String text){
+        this.receaver = receaver;
+        this.title = title;
+        this.text = text;
+        try{
+            if (this.text.toCharArray().length > 120){
+                this.text = null;
+                throw new BiggerThan120Symbols("The text is bigger than 120 symbols and it can't be saved.");
+            }
+        } catch (BiggerThan120Symbols ex) {
+            System.out.println(ex.getMessage());
+        }catch (NullPointerException ex) {
+        }
+
+    }
+
+    public String getReceaver() {
+        return receaver;
+    }
+
+    public void setReceaver(String receaver) {
+        this.receaver = receaver;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+        try{
+            if (this.text.toCharArray().length > 120){
+                this.text = null;
+                throw new BiggerThan120Symbols("The text is bigger than 120 symbols and it can't be saved.");
+            }
+        } catch (BiggerThan120Symbols ex){
+            System.out.println(ex.getMessage());
+        }
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void printSMS() {
+        Boolean exceptionTrown = false;
+        String hostname = " ";
+        try {
+            if (this.receaver == null || this.text == null || this.title == null) {
+                throw new NullPointerException("The message couldn't be sent, because there are left-behind, blank strings.");
+            }
+
+            InetAddress addr;
+            addr = InetAddress.getLocalHost();
+            hostname = addr.getHostName();
+        } catch (NullPointerException ex) {
+            System.out.println(ex.getMessage());
+            exceptionTrown = true;
+        } catch (UnknownHostException ex) {
+            System.out.println("Hostname can not be resolved");
+        }
+
+        if(hostname == " "){
+            hostname = "Unknown";
+        }
+
+        if (!exceptionTrown) {
+            System.out.println("From: " + hostname);
+            System.out.println("To: " + this.receaver);
+            System.out.println("                 " + this.title);
+            System.out.println();
+            System.out.print("    ");
+            String[] splittedText = text.split(" ");
+            for (int i = 0; i < splittedText.length; i++) {
+                if (i % 9 == 0 && i != 0) {
+                    System.out.println(" " + splittedText[i]);
+                } else {
+                    System.out.print(" " + splittedText[i]);
+                }
+            }
+            System.out.println();
+        }
+    }
+
+    public void sendSMS(){
+        System.out.println("Send!");
+    }
+}
+
+class BiggerThan120Symbols extends Exception {
+    public BiggerThan120Symbols () {}
+    public BiggerThan120Symbols (String message) {
+        super (message);
+    }
+}
+
+//Tests without using mocking
+class TestingMethods {
+
+    public final void SetAndGetReceaver_CorrectInput_CompleteSetAndGet() {
+        SMSProgram smsProgram = new SMSProgram();
+        smsProgram.setReceaver("Receaver");
+        Assert.assertEquals("There is a program with the set/get to the Receaver method!", "Receaver", smsProgram.getReceaver());
+    }
+
+    public final void SetAndGetTitle_CorrectInput_CompleteSetAndGet() {
+        SMSProgram smsProgram = new SMSProgram();
+        smsProgram.setTitle("Title");
+        Assert.assertEquals("There is a program with the set/get to the Title method!", "Title", smsProgram.getTitle());
+    }
+
+    @Test //(expected = BiggerThan120Symbols.class)
+    public final void SetAndGetText_CorrectInput_CompleteSetAndGet() {
+        SMSProgram smsProgram = new SMSProgram();
+        smsProgram.setText("Test text.");
+        Assert.assertEquals("There is a program with the set/get to the text method!", "Test text.", smsProgram.getText());
+    }
+
+    @Test (expected = BiggerThan120Symbols.class)
+    public final void SetAndGetText_BiggerThan120Input_Throw() {
+        SMSProgram smsProgram = new SMSProgram();
+        smsProgram.setText("Test text.Test text.Test text.Test text.Test text.Test text.Test text.Test text.Test text.Test text.");
+    }
+
+    @Test
+    public final void SetAndGetReceaver_CorrectInput_Complete() {
+        SMSProgram smsProgram = new SMSProgram("receaver", "title", "text");
+        Assert.assertEquals("There is a program with the set/get to the text method! - receaver", "receaver", smsProgram.getReceaver());
+    }
+
+    @Test
+    public final void SetAndGetTitle_CorrectInput_Complete() {
+        SMSProgram smsProgram = new SMSProgram("receaver", "title", "text");
+        Assert.assertEquals("There is a program with the set/get to the text method! - title", "title", smsProgram.getTitle());
+    }
+
+    @Test
+    public final void SetAndGetText_CorrectInput_Complete() {
+        SMSProgram smsProgram = new SMSProgram("receaver", "title", "text");
+        Assert.assertEquals("There is a program with the set/get to the text method! - text", "text", smsProgram.getText());
+    }
+
+    @Test (expected = NullPointerException.class)
+    public final void PrintSms_NullReceaverInput_Throw(){
+        SMSProgram smsProgram = new SMSProgram(null, "title", "text");
+        smsProgram.printSMS();
+    }
+
+    @Test (expected = NullPointerException.class)
+    public final void PrintSms_NullTitleInput_Throw(){
+        SMSProgram smsProgram = new SMSProgram("Receaver", null, "text");
+        smsProgram.printSMS();
+    }
+
+    @Test (expected = NullPointerException.class)
+    public final void PrintSms_NullTextInput_Throw(){
+        SMSProgram smsProgram = new SMSProgram("Receaver", "title", null);
+        smsProgram.printSMS();
+    }
+}
